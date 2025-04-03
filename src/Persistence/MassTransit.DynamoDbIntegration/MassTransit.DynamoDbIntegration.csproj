@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" />
+    <ProjectReference Include="..\..\..\..\DynamoDB.Transaction\src\DynamoDB.Transaction\DynamoDB.Transaction.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 
