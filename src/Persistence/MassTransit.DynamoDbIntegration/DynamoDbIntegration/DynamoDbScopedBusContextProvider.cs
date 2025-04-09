@@ -1,10 +1,10 @@
-﻿namespace MassTransit.DynamoDbIntegration.Outbox
+﻿namespace MassTransit.DynamoDbIntegration
 {
     using System;
     using Amazon.DynamoDBv2.DataModel;
-    using DependencyInjection;
     using DynamoDB.Transaction.Interfaces;
-    using Middleware.Outbox;
+    using MassTransit.DependencyInjection;
+    using MassTransit.Middleware.Outbox;
 
 
     public class DynamoDbScopedBusContextProvider<TBus> :

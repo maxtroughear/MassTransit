@@ -9,6 +9,7 @@ namespace MassTransit.DynamoDbIntegration.Saga
     using Amazon.DynamoDBv2.Model;
     using Serialization;
 
+    // TODO(Max): Refactor out Saga logic and details to DynamoDbSagaRepositoryContext so this can become a more generic database context. Might also be worth renaming this to a non transactional context and create a second transactional context (similar to Mongo)
 
     public class DynamoDbDatabaseContext<TSaga> :
         DatabaseContext<TSaga>

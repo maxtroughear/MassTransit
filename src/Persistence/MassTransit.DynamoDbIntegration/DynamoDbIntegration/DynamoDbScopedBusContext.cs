@@ -1,16 +1,17 @@
 ﻿#nullable enable
-namespace MassTransit.DynamoDbIntegration.Outbox
+namespace MassTransit.DynamoDbIntegration
 {
     using System;
     using System.Threading.Tasks;
     using Amazon.DynamoDBv2.DataModel;
+    using DynamoDB.Transaction.Interfaces;
     using Clients;
     using DependencyInjection;
-    using DynamoDB.Transaction.Interfaces;
     using Middleware;
-    using Middleware.Outbox;
+    using MassTransit.Middleware.Outbox;
     using Serialization;
     using Transports;
+    using Outbox;
 
 
     public class DynamoDbScopedBusContext<TBus> :
@@ -45,6 +46,9 @@ namespace MassTransit.DynamoDbIntegration.Outbox
         public Task AddSend<T>(SendContext<T> context)
             where T : class
         {
+            // TODO(Max): Support multiple transactions (see MongoDB and EF Core implementations
+
+            // TODO(Max): Make table name configurable (with a default)
             var transactWrite = _dynamoDbContext.CreateTransactWrite<OutboxMessage>(new DynamoDBOperationConfig { OverrideTableName = "MassTransit-Outbox" });
 
             transactWrite.AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId);
@@ -79,42 +83,6 @@ namespace MassTransit.DynamoDbIntegration.Outbox
         protected virtual ISendEndpointProvider GetSendEndpointProvider()
         {
             return _bus;
-        }
-    }
-
-
-    public class DynamoDbConsumeContextScopedBusContext<TBus> :
-        DynamoDbScopedBusContext<TBus>
-        where TBus : class, IBus
-    {
-        readonly TBus _bus;
-        readonly IClientFactory _clientFactory;
-        readonly ConsumeContext _consumeContext;
-        readonly IServiceProvider _provider;
-
-        public DynamoDbConsumeContextScopedBusContext(TBus bus, IDynamoDBContext dynamoDbContext, IDynamoDbScopedContext dynamoDbScopedContext,
-            IBusOutboxNotification notification, IClientFactory clientFactory, IServiceProvider provider, ConsumeContext consumeContext)
-            : base(bus, dynamoDbContext, dynamoDbScopedContext, notification, clientFactory, provider)
-        {
-            _bus = bus;
-            _clientFactory = clientFactory;
-            _provider = provider;
-            _consumeContext = consumeContext;
-        }
-
-        protected override IPublishEndpointProvider GetPublishEndpointProvider()
-        {
-            return new ScopedConsumePublishEndpointProvider(_bus, _consumeContext, _provider);
-        }
-
-        protected override ISendEndpointProvider GetSendEndpointProvider()
-        {
-            return new ScopedConsumeSendEndpointProvider(_bus, _consumeContext, _provider);
-        }
-
-        protected override ScopedClientFactory GetClientFactory()
-        {
-            return new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext(_clientFactory, _provider)), _consumeContext);
         }
     }
 }

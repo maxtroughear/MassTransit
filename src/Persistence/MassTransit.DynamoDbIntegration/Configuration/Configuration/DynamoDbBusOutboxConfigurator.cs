@@ -2,6 +2,7 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using DynamoDbIntegration;
     using DynamoDbIntegration.Outbox;
     using MassTransit.DependencyInjection;
     using MassTransit.Middleware.Outbox;

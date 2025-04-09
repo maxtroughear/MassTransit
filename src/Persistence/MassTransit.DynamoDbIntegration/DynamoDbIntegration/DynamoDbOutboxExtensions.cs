@@ -1,9 +1,10 @@
-﻿namespace MassTransit.DynamoDbIntegration.Outbox
+﻿namespace MassTransit.DynamoDbIntegration
 {
     using System;
     using System.Collections.Generic;
     using Amazon.DynamoDBv2.DataModel;
     using Context;
+    using Outbox;
 
 
     public static class DynamoDbOutboxExtensions
