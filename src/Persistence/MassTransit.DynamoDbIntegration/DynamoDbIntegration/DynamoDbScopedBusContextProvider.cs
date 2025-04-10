@@ -2,8 +2,7 @@
 {
     using System;
     using Amazon.DynamoDBv2.DataModel;
-    using DynamoDB.Transaction.Interfaces;
-    using MassTransit.DependencyInjection;
+    using DependencyInjection;
     using MassTransit.Middleware.Outbox;
 
 
@@ -13,7 +12,7 @@
     {
         public ScopedBusContext Context { get; }
 
-        public DynamoDbScopedBusContextProvider(TBus bus, IDynamoDBContext dynamoDbContext, IDynamoDbScopedContext dynamoDbScopedContext,
+        public DynamoDbScopedBusContextProvider(TBus bus, DynamoDbContext dbContext,
             IBusOutboxNotification notification,
             Bind<TBus, IClientFactory> clientFactory, Bind<TBus, IScopedConsumeContextProvider> consumeContextProvider,
             IScopedConsumeContextProvider globalConsumeContextProvider, IServiceProvider provider)
@@ -22,12 +21,12 @@
                 Context = new ConsumeContextScopedBusContext(consumeContextProvider.Value.GetContext(), clientFactory.Value);
             else if (globalConsumeContextProvider.HasContext)
             {
-                Context = new DynamoDbConsumeContextScopedBusContext<TBus>(bus, dynamoDbContext, dynamoDbScopedContext, notification, clientFactory.Value,
+                Context = new DynamoDbConsumeContextScopedBusContext<TBus>(bus, dbContext, notification, clientFactory.Value,
                     provider,
                     globalConsumeContextProvider.GetContext());
             }
             else
-                Context = new DynamoDbScopedBusContext<TBus>(bus, dynamoDbContext, dynamoDbScopedContext, notification, clientFactory.Value, provider);
+                Context = new DynamoDbScopedBusContext<TBus>(bus, dbContext, notification, clientFactory.Value, provider);
         }
     }
 }

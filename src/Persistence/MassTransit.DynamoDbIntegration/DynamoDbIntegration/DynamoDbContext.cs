@@ -17,5 +17,5 @@ public interface DynamoDbContext
     Task CommitTransaction(CancellationToken cancellationToken);
     void AbortTransaction();
 
-    // DynamoDbTableContext<T> GetTableContext<T>();
+    DynamoDbTableContext<T> GetTableContext<T>();
 }

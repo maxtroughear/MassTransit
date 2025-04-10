@@ -5,7 +5,6 @@ using System;
 using Amazon.DynamoDBv2.DataModel;
 using Clients;
 using DependencyInjection;
-using DynamoDB.Transaction.Interfaces;
 using Middleware.Outbox;
 
 
@@ -18,9 +17,9 @@ public class DynamoDbConsumeContextScopedBusContext<TBus> :
     readonly ConsumeContext _consumeContext;
     readonly IServiceProvider _provider;
 
-    public DynamoDbConsumeContextScopedBusContext(TBus bus, IDynamoDBContext dynamoDbContext, IDynamoDbScopedContext dynamoDbScopedContext,
-        IBusOutboxNotification notification, IClientFactory clientFactory, IServiceProvider provider, ConsumeContext consumeContext)
-        : base(bus, dynamoDbContext, dynamoDbScopedContext, notification, clientFactory, provider)
+    public DynamoDbConsumeContextScopedBusContext(TBus bus, DynamoDbContext dbContext, IBusOutboxNotification notification, IClientFactory clientFactory,
+        IServiceProvider provider, ConsumeContext consumeContext)
+        : base(bus, dbContext, notification, clientFactory, provider)
     {
         _bus = bus;
         _clientFactory = clientFactory;

@@ -4,7 +4,6 @@ namespace MassTransit.DynamoDbIntegration
     using System;
     using System.Threading.Tasks;
     using Amazon.DynamoDBv2.DataModel;
-    using DynamoDB.Transaction.Interfaces;
     using Clients;
     using DependencyInjection;
     using Middleware;
@@ -23,22 +22,20 @@ namespace MassTransit.DynamoDbIntegration
         readonly IClientFactory _clientFactory;
         readonly IBusOutboxNotification _notification;
         readonly IServiceProvider _provider;
-        readonly IDynamoDBContext _dynamoDbContext;
-        readonly IDynamoDbScopedContext _dynamoDbScopedContext;
+        readonly DynamoDbContext _dbContext;
         readonly Guid _outboxId;
         IPublishEndpoint? _publishEndpoint;
         IScopedClientFactory? _scopedClientFactory;
         ISendEndpointProvider? _sendEndpointProvider;
 
-        public DynamoDbScopedBusContext(TBus bus, IDynamoDBContext dynamoDbContext, IDynamoDbScopedContext dynamoDbScopedContext,
-            IBusOutboxNotification notification, IClientFactory clientFactory, IServiceProvider provider)
+        public DynamoDbScopedBusContext(TBus bus, DynamoDbContext dbContext, IBusOutboxNotification notification, IClientFactory clientFactory,
+            IServiceProvider provider)
         {
             _bus = bus;
             _notification = notification;
             _clientFactory = clientFactory;
             _provider = provider;
-            _dynamoDbContext = dynamoDbContext;
-            _dynamoDbScopedContext = dynamoDbScopedContext;
+            _dbContext = dbContext;
 
             _outboxId = NewId.NextGuid();
         }
@@ -49,11 +46,11 @@ namespace MassTransit.DynamoDbIntegration
             // TODO(Max): Support multiple transactions (see MongoDB and EF Core implementations
 
             // TODO(Max): Make table name configurable (with a default)
-            var transactWrite = _dynamoDbContext.CreateTransactWrite<OutboxMessage>(new DynamoDBOperationConfig { OverrideTableName = "MassTransit-Outbox" });
+            // var transactWrite = _dynamoDbContext.CreateTransactWrite<OutboxMessage>(new DynamoDBOperationConfig { OverrideTableName = "MassTransit-Outbox" });
 
-            transactWrite.AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId);
+            // transactWrite.AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId);
 
-            _dynamoDbScopedContext.AddTransactWrite(transactWrite);
+            // _dbContext.AddTransactWrite(transactWrite);
 
             return Task.CompletedTask;
         }
