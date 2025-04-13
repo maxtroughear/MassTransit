@@ -19,6 +19,7 @@ public class TransactionDynamoDbTableContext<T> : DynamoDbTableContext<T>
     readonly IAmazonDynamoDB _databaseClient;
     readonly IDynamoDBContext _databaseContext;
     readonly DynamoDbTableOptions<T> _options;
+    readonly DynamoDBOperationConfig _config;
 
     public TransactionDynamoDbTableContext(DynamoDbContext context, IAmazonDynamoDB databaseClient, IDynamoDBContext databaseContext,
         IOptions<DynamoDbTableOptions<T>> options)
@@ -27,11 +28,27 @@ public class TransactionDynamoDbTableContext<T> : DynamoDbTableContext<T>
         _databaseClient = databaseClient;
         _databaseContext = databaseContext;
         _options = options.Value;
+        _config = new DynamoDBOperationConfig
+        {
+            OverrideTableName = _options.TableName,
+            ConsistentRead = true
+        };
     }
 
     public async Task<List<T>> Query(QueryOperationConfig queryOperationConfig, CancellationToken cancellationToken)
     {
-        return await _databaseContext.FromQueryAsync<T>(queryOperationConfig, _options.Config).GetRemainingAsync(cancellationToken);
+        return await _databaseContext.FromQueryAsync<T>(queryOperationConfig, _config).GetRemainingAsync(cancellationToken);
+    }
+
+    public async Task<List<T>> Query(object hashKeyValue, CancellationToken cancellationToken)
+    {
+        return await _databaseContext.QueryAsync<T>(hashKeyValue, _config).GetRemainingAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<List<T>> Query(object hashKeyValue, QueryOperator queryOperator, IEnumerable<object> rangeKeyValues, CancellationToken cancellationToken)
+    {
+        return await _databaseContext.QueryAsync<T>(hashKeyValue, queryOperator, rangeKeyValues, _config).GetRemainingAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async Task<List<T>> Query(QueryRequest queryRequest, CancellationToken cancellationToken)
@@ -76,6 +93,11 @@ public class TransactionDynamoDbTableContext<T> : DynamoDbTableContext<T>
 
     public async Task Lock(T instance, CancellationToken cancellationToken)
     {
-        _databaseContext.SaveAsync(instance, _options.Config, cancellationToken);
+        _databaseContext.SaveAsync(instance, _config, cancellationToken);
+    }
+
+    public Task<DynamoDbLock> Lock(object lockId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }
